@@ -1,0 +1,387 @@
+{
+  "info": {
+    "_postman_id": "475afd15-b9e2-4566-8046-1e109dd344a4",
+    "name": "Raízes do Nordeste",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "56012941",
+    "_collection_link": "https://go.postman.co/collection/56012941-475afd15-b9e2-4566-8046-1e109dd344a4?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Cadastro - Sucesso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - e-mail duplicado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {\n    pm.response.to.have.status(409);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - CPF duplicado",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 409\", function () {\n    pm.response.to.have.status(409);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - nome vazio",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - e-mail inválido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"email-invalido\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - senha-curta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"Curta123!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - senha acima do limite",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cadastro - JSON inválido",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400\", function () {\n    pm.response.to.have.status(400);\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"nome\": \"Cliente de teste\"\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/cadastro",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "cadastro"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
