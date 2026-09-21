@@ -23,10 +23,14 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> {})
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 HttpMethod.POST,
-                                "/api/v1/auth/cadastro"
+                                "/api/v1/auth/cadastro",
+                                "/api/v1/auth/login"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

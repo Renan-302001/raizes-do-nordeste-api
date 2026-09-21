@@ -1,5 +1,6 @@
 package br.com.raizesdonordeste.api.controller.exception;
 
+import br.com.raizesdonordeste.api.application.exception.CredenciaisInvalidasException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -133,5 +134,35 @@ class ApiExceptionHandlerTest {
                 "/api/v1/auth/cadastro",
                 resposta.getBody().getPath()
         );
+    }
+
+    @Test
+    void deveRetornar401ParaCredenciaisInvalidas() {
+        CredenciaisInvalidasException exception =
+                new CredenciaisInvalidasException();
+
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST",
+                "/api/v1/auth/login"
+        );
+
+        ApiExceptionHandler handler = new ApiExceptionHandler();
+        var resposta = handler.tratarCredenciaisInvalidas(exception, request);
+
+        assertEquals(401, resposta.getStatusCode().value());
+        assertNotNull(resposta.getBody());
+        assertEquals(
+                "CREDENCIAIS_INVALIDAS",
+                resposta.getBody().getCode()
+        );
+        assertEquals(
+                "E-mail ou senha inválidos.",
+                resposta.getBody().getMessage()
+        );
+        assertEquals(
+                "/api/v1/auth/login",
+                resposta.getBody().getPath()
+        );
+        assertTrue(resposta.getBody().getDetails().isEmpty());
     }
 }

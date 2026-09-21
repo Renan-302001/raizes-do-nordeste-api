@@ -2,6 +2,7 @@ package br.com.raizesdonordeste.api.controller.exception;
 
 
 import br.com.raizesdonordeste.api.application.exception.CadastroDuplicadoException;
+import br.com.raizesdonordeste.api.application.exception.CredenciaisInvalidasException;
 import br.com.raizesdonordeste.api.application.exception.SenhaInvalidaException;
 import br.com.raizesdonordeste.api.controller.dto.ErroCampoResponse;
 import br.com.raizesdonordeste.api.controller.dto.ErroResponse;
@@ -143,5 +144,26 @@ public class ApiExceptionHandler {
         );
 
         return ResponseEntity.status(500).body(erro);
+
     }
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ErroResponse> tratarCredenciaisInvalidas(
+            CredenciaisInvalidasException exception,
+            HttpServletRequest request
+    ) {
+        ErroResponse erro = new ErroResponse(
+                Instant.now(),
+                401,
+                "CREDENCIAIS_INVALIDAS",
+                exception.getMessage(),
+                request.getRequestURI(),
+                UUID.randomUUID().toString(),
+                List.of()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(erro);
+    }
+
+
+
 }

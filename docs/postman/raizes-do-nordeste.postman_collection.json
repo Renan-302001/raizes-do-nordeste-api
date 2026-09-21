@@ -382,6 +382,206 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Login - Sucesso",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Retorna um token Bearer\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.accessToken).to.be.a(\"string\").and.not.empty;\r\n    pm.expect(resposta.tokenType).to.eql(\"Bearer\");\r\n    pm.expect(resposta.expiresIn).to.eql(900);\r\n});\r\n\r\npm.test(\"Não expõe dados sensíveis\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta).not.to.have.property(\"senha\");\r\n    pm.expect(resposta).not.to.have.property(\"senhaHash\");\r\n});\r\n\r\nconst resposta = pm.response.json();\r\npm.collectionVariables.set(\"accessToken\", resposta.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login - Senha incorreta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Retorna status 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de credenciais\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"CREDENCIAIS_INVALIDAS\");\r\n    pm.expect(resposta.message).to.eql(\"E-mail ou senha inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\").that.is.empty;\r\n});\r\n\r\npm.test(\"Não informa qual credencial está incorreta\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.message).not.to.include(\"cadastrado\");\r\n    pm.expect(resposta.message).not.to.include(\"incorreta\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia10!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login - e-mail inexistente",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Retorna status 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de credenciais\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"CREDENCIAIS_INVALIDAS\");\r\n    pm.expect(resposta.message).to.eql(\"E-mail ou senha inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\").that.is.empty;\r\n});\r\n\r\npm.test(\"Não informa se o e-mail está cadastrado\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.message).not.to.include(\"não cadastrado\");\r\n    pm.expect(resposta.message).not.to.include(\"não existe\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"naoexiste@example.com\",\r\n  \"senha\": \"SenhaQualquer123!\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login - campos obrigatórios vazios",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Retorna status 422\", function () {\r\n    pm.response.to.have.status(422);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de validação\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"VALIDATION_ERROR\");\r\n    pm.expect(resposta.message).to.eql(\"Existem campos inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Informa os dois campos obrigatórios\", function () {\r\n    const resposta = pm.response.json();\r\n    const campos = resposta.details.map(detalhe => detalhe.field);\r\n\r\n    pm.expect(campos).to.include(\"email\");\r\n    pm.expect(campos).to.include(\"senha\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"\",\r\n  \"senha\": \"\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/v1/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "v1",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "accessToken",
+      "value": ""
     }
   ]
 }
