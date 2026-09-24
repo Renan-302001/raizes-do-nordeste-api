@@ -3,6 +3,8 @@ package br.com.raizesdonordeste.api.controller.exception;
 
 import br.com.raizesdonordeste.api.application.exception.CadastroDuplicadoException;
 import br.com.raizesdonordeste.api.application.exception.CredenciaisInvalidasException;
+import br.com.raizesdonordeste.api.application.exception.RecursoNaoEncontradoException;
+import br.com.raizesdonordeste.api.application.exception.RegraNegocioException;
 import br.com.raizesdonordeste.api.application.exception.SenhaInvalidaException;
 import br.com.raizesdonordeste.api.controller.dto.ErroCampoResponse;
 import br.com.raizesdonordeste.api.controller.dto.ErroResponse;
@@ -162,6 +164,42 @@ public class ApiExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(erro);
+    }
+
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    public ResponseEntity<ErroResponse> tratarRecursoNaoEncontrado(
+            RecursoNaoEncontradoException exception,
+            HttpServletRequest request
+    ) {
+        ErroResponse erro = new ErroResponse(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "RESOURCE_NOT_FOUND",
+                exception.getMessage(),
+                request.getRequestURI(),
+                UUID.randomUUID().toString(),
+                List.of()
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(erro);
+    }
+
+    @ExceptionHandler(RegraNegocioException.class)
+    public ResponseEntity<ErroResponse> tratarRegraNegocio(
+            RegraNegocioException exception,
+            HttpServletRequest request
+    ) {
+        ErroResponse erro = new ErroResponse(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "BUSINESS_RULE_VIOLATION",
+                exception.getMessage(),
+                request.getRequestURI(),
+                UUID.randomUUID().toString(),
+                List.of()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(erro);
     }
 
 

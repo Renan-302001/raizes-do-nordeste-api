@@ -6,6 +6,7 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -26,7 +27,7 @@ public class JwtService {
         this.expirationSeconds = expirationSeconds;
     }
 
-    public Jwt gerarToken(UUID idUsuario) {
+    public Jwt gerarToken(UUID idUsuario, String perfil) {
         Instant agora = Instant.now();
         Instant expiracao = agora.plusSeconds(expirationSeconds);
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -34,6 +35,7 @@ public class JwtService {
                 .subject(idUsuario.toString())
                 .issuedAt(agora)
                 .expiresAt(expiracao)
+                .claim("roles", List.of(perfil))
                 .build();
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
 

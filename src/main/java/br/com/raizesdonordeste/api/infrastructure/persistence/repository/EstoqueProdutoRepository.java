@@ -2,6 +2,9 @@ package br.com.raizesdonordeste.api.infrastructure.persistence.repository;
 
 import br.com.raizesdonordeste.api.domain.model.EstoqueProduto;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +15,13 @@ import java.util.UUID;
 
 public interface EstoqueProdutoRepository extends JpaRepository<EstoqueProduto, UUID> {
 
+    @EntityGraph(attributePaths = {"unidade", "produto"})
+    Page<EstoqueProduto> findByUnidade_IdUnidade(
+            UUID idUnidade,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"unidade", "produto"})
     Optional<EstoqueProduto> findByUnidade_IdUnidadeAndProduto_IdProduto(
             UUID idUnidade,
             UUID idProduto

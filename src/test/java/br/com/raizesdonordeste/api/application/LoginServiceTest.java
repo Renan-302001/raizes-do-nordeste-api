@@ -2,7 +2,10 @@ package br.com.raizesdonordeste.api.application;
 
 import br.com.raizesdonordeste.api.application.exception.CredenciaisInvalidasException;
 import br.com.raizesdonordeste.api.domain.model.StatusConta;
-import br.com.raizesdonordeste.api.domain.model.Usuario;
+import br.com.raizesdonordeste.api.domain.model.Cliente;
+import br.com.raizesdonordeste.api.domain.model.Funcionario;
+import br.com.raizesdonordeste.api.domain.model.Perfil;
+import br.com.raizesdonordeste.api.domain.model.StatusVinculo;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.UsuarioRepository;
 import br.com.raizesdonordeste.api.infrastructure.security.JwtService;
 import org.junit.jupiter.api.Test;
@@ -32,7 +35,13 @@ class LoginServiceTest {
     private JwtService jwtService;
 
     @Mock
-    private Usuario usuario;
+    private Cliente usuario;
+
+    @Mock
+    private Funcionario funcionario;
+
+    @Mock
+    private Perfil perfil;
 
     @InjectMocks
     private LoginService loginService;
@@ -58,12 +67,12 @@ class LoginServiceTest {
         when(usuario.getStatusConta()).thenReturn(StatusConta.ATIVA);
         when(usuario.getIdUsuario()).thenReturn(idUsuario);
 
-        when(jwtService.gerarToken(idUsuario)).thenReturn(token);
+        when(jwtService.gerarToken(idUsuario, "CLIENTE")).thenReturn(token);
 
         Jwt resultado = loginService.autenticar(email, senha);
 
         assertSame(token, resultado);
-        verify(jwtService).gerarToken(idUsuario);
+        verify(jwtService).gerarToken(idUsuario, "CLIENTE");
     }
     @Test
     void deveRejeitarQuandoEmailNaoExiste() {
@@ -128,6 +137,32 @@ class LoginServiceTest {
 
         assertEquals("E-mail ou senha inválidos.", exception.getMessage());
         verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void deveGerarTokenComPerfilDoFuncionarioAtivo() {
+        String email = "admin@raizes.local";
+        String senha = "SenhaCorreta123!";
+        String senhaHash = "{bcrypt}hash-simulado";
+        UUID idUsuario = UUID.randomUUID();
+
+        when(usuarioRepository.findByEmail(email))
+                .thenReturn(Optional.of(funcionario));
+        when(funcionario.getSenhaHash()).thenReturn(senhaHash);
+        when(passwordEncoder.matches(senha, senhaHash)).thenReturn(true);
+        when(funcionario.getStatusConta()).thenReturn(StatusConta.ATIVA);
+        when(funcionario.getStatusVinculo()).thenReturn(StatusVinculo.ATIVO);
+        when(funcionario.getPerfil()).thenReturn(perfil);
+        when(perfil.isAtivo()).thenReturn(true);
+        when(perfil.getCodigoPerfil()).thenReturn("ADMIN_MATRIZ");
+        when(funcionario.getIdUsuario()).thenReturn(idUsuario);
+        when(jwtService.gerarToken(idUsuario, "ADMIN_MATRIZ"))
+                .thenReturn(token);
+
+        Jwt resultado = loginService.autenticar(email, senha);
+
+        assertSame(token, resultado);
+        verify(jwtService).gerarToken(idUsuario, "ADMIN_MATRIZ");
     }
 
 }

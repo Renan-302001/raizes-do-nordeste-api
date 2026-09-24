@@ -1,5 +1,7 @@
 package br.com.raizesdonordeste.api.controller.exception;
 
+import br.com.raizesdonordeste.api.application.exception.RecursoNaoEncontradoException;
+import br.com.raizesdonordeste.api.application.exception.RegraNegocioException;
 import br.com.raizesdonordeste.api.application.exception.CredenciaisInvalidasException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,44 @@ import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ApiExceptionHandlerTest {
+
+    @Test
+    void deveRetornar404ParaRecursoNaoEncontrado() {
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "GET",
+                "/api/v1/produtos/inexistente"
+        );
+
+        ApiExceptionHandler handler = new ApiExceptionHandler();
+        var resposta = handler.tratarRecursoNaoEncontrado(
+                new RecursoNaoEncontradoException("Produto não encontrado."),
+                request
+        );
+
+        assertEquals(404, resposta.getStatusCode().value());
+        assertNotNull(resposta.getBody());
+        assertEquals("RESOURCE_NOT_FOUND", resposta.getBody().getCode());
+        assertEquals("Produto não encontrado.", resposta.getBody().getMessage());
+    }
+
+    @Test
+    void deveRetornar409ParaViolacaoDeRegraDeNegocio() {
+        MockHttpServletRequest request = new MockHttpServletRequest(
+                "POST",
+                "/api/v1/unidades/1/estoques/1/movimentacoes"
+        );
+
+        ApiExceptionHandler handler = new ApiExceptionHandler();
+        var resposta = handler.tratarRegraNegocio(
+                new RegraNegocioException("Estoque insuficiente."),
+                request
+        );
+
+        assertEquals(409, resposta.getStatusCode().value());
+        assertNotNull(resposta.getBody());
+        assertEquals("BUSINESS_RULE_VIOLATION", resposta.getBody().getCode());
+        assertEquals("Estoque insuficiente.", resposta.getBody().getMessage());
+    }
 
     @Test
     void deveRetornar409ParaEmailDuplicadoNoBanco() {

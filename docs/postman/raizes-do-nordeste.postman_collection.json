@@ -8,579 +8,1100 @@
   },
   "item": [
     {
-      "name": "Cadastro - Sucesso",
-      "event": [
+      "name": "Auth",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Login - Sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Retorna um token Bearer\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.accessToken).to.be.a(\"string\").and.not.empty;\r\n    pm.expect(resposta.tokenType).to.eql(\"Bearer\");\r\n    pm.expect(resposta.expiresIn).to.eql(900);\r\n});\r\n\r\npm.test(\"Não expõe dados sensíveis\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta).not.to.have.property(\"senha\");\r\n    pm.expect(resposta).not.to.have.property(\"senhaHash\");\r\n});\r\n\r\nconst resposta = pm.response.json();\r\npm.collectionVariables.set(\"accessToken\", resposta.accessToken);"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - senha-curta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"Curta123!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - CPF duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {\n    pm.response.to.have.status(409);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - e-mail duplicado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 409\", function () {\n    pm.response.to.have.status(409);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - Sucesso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {\n    pm.response.to.have.status(201);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - nome vazio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - e-mail inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"email-invalido\",\r\n  \"senha\": \"{{clientPassword}}\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - senha acima do limite",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cadastro - JSON inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {\n    pm.response.to.have.status(400);\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nome\": \"Cliente de teste\"\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/cadastro",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "cadastro"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Senha incorreta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de credenciais\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"CREDENCIAIS_INVALIDAS\");\r\n    pm.expect(resposta.message).to.eql(\"E-mail ou senha inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\").that.is.empty;\r\n});\r\n\r\npm.test(\"Não informa qual credencial está incorreta\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.message).not.to.include(\"cadastrado\");\r\n    pm.expect(resposta.message).not.to.include(\"incorreta\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia10!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - e-mail inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de credenciais\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"CREDENCIAIS_INVALIDAS\");\r\n    pm.expect(resposta.message).to.eql(\"E-mail ou senha inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\").that.is.empty;\r\n});\r\n\r\npm.test(\"Não informa se o e-mail está cadastrado\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.message).not.to.include(\"não cadastrado\");\r\n    pm.expect(resposta.message).not.to.include(\"não existe\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"naoexiste@example.com\",\r\n  \"senha\": \"SenhaQualquer123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - campos obrigatórios vazios",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 422\", function () {\r\n    pm.response.to.have.status(422);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de validação\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"VALIDATION_ERROR\");\r\n    pm.expect(resposta.message).to.eql(\"Existem campos inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Informa os dois campos obrigatórios\", function () {\r\n    const resposta = pm.response.json();\r\n    const campos = resposta.details.map(detalhe => detalhe.field);\r\n\r\n    pm.expect(campos).to.include(\"email\");\r\n    pm.expect(campos).to.include(\"senha\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"\",\r\n  \"senha\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Cadastro - e-mail duplicado",
-      "event": [
+      "name": "Estoque e Produtos",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 409\", function () {\n    pm.response.to.have.status(409);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Login - Administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst resposta = pm.response.json();\r\npm.collectionVariables.set(\"adminAccessToken\", resposta.accessToken);"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cadastro - CPF duplicado",
-      "event": [
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"admin.matriz@raizes.local\",\r\n  \"senha\": \"{{adminPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 409\", function () {\n    pm.response.to.have.status(409);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Login - Cliente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Retorna um token Bearer\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.accessToken).to.be.a(\"string\").and.not.empty;\r\n    pm.expect(resposta.tokenType).to.eql(\"Bearer\");\r\n    pm.expect(resposta.expiresIn).to.eql(900);\r\n});\r\n\r\npm.test(\"Não expõe dados sensíveis\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta).not.to.have.property(\"senha\");\r\n    pm.expect(resposta).not.to.have.property(\"senhaHash\");\r\n});\r\n\r\nconst resposta = pm.response.json();\r\npm.collectionVariables.set(\"accessToken\", resposta.accessToken);"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cadastro - nome vazio",
-      "event": [
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Listar Unidade - público",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Retorna a unidade de demonstração\", function () {\r\n    const resposta = pm.response.json();\r\n    const unidade = resposta.content.find(\r\n        item => item.codigoPublico === \"RECIFE-CENTRO\"\r\n    );\r\n\r\n    pm.expect(unidade).to.exist;\r\n    pm.collectionVariables.set(\"idUnidade\", unidade.idUnidade);\r\n});"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cadastro - e-mail inválido",
-      "event": [
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/unidades?page=0&size=20",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "unidades"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"email-invalido\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Cadastrar produto - administrador",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\r\n    \"codigoProdutoTeste\",\r\n    \"CUSCUZ-\" + Date.now()\r\n);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Cadastra produto ativo\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.idProduto).to.exist;\r\n    pm.expect(resposta.statusProduto).to.eql(\"ATIVO\");\r\n\r\n    pm.collectionVariables.set(\"idProduto\", resposta.idProduto);\r\n});"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cadastro - senha-curta",
-      "event": [
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"codigoPublico\": \"{{codigoProdutoTeste}}\",\r\n  \"nome\": \"Cuscuz Tradicional\",\r\n  \"descricao\": \"Cuscuz nordestino tradicional.\",\r\n  \"categoria\": \"CAFE_DA_MANHA\",\r\n  \"imagemUrl\": null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/produtos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "produtos"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"Curta123!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Cadastrar produto - cliente sem permissão",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"codigoPublico\": \"CUSCUZ-001\",\r\n  \"nome\": \"Cuscuz Tradicional\",\r\n  \"descricao\": \"Cuscuz nordestino tradicional.\",\r\n  \"categoria\": \"CAFE_DA_MANHA\",\r\n  \"imagemUrl\": null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/produtos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "produtos"
+              ]
             }
-          }
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cadastro - senha acima do limite",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 422\", function () {\n    pm.response.to.have.status(422);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\",\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Registrar entrada de estoque",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Registra entrada de 30 unidades\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.tipoMovimentacao).to.eql(\"ENTRADA\");\r\n    pm.expect(resposta.quantidade).to.eql(30);\r\n    pm.expect(resposta.saldoDisponivelAnterior).to.eql(0);\r\n    pm.expect(resposta.saldoDisponivelPosterior).to.eql(30);\r\n});"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Cadastro - JSON inválido",
-      "event": [
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipoMovimentacao\": \"ENTRADA\",\r\n  \"quantidade\": 30,\r\n  \"motivo\": \"Carga inicial para demonstração\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/unidades/{{idUnidade}}/estoques/{{idProduto}}/movimentacoes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "unidades",
+                "{{idUnidade}}",
+                "estoques",
+                "{{idProduto}}",
+                "movimentacoes"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Status code is 400\", function () {\n    pm.response.to.have.status(400);\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"nome\": \"Cliente de teste\"\r\n  \"email\": \"cadastro2.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\",\r\n  \"cpf\": \"52998224725\",\r\n  \"dataNascimento\": \"2000-06-30\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Consultar estoque",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Retorna o saldo criado\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.idUnidade).to.eql(\r\n        pm.collectionVariables.get(\"idUnidade\")\r\n    );\r\n    pm.expect(resposta.idProduto).to.eql(\r\n        pm.collectionVariables.get(\"idProduto\")\r\n    );\r\n    pm.expect(resposta.quantidadeDisponivel).to.eql(30);\r\n    pm.expect(resposta.quantidadeReservada).to.eql(0);\r\n    pm.expect(resposta.quantidadeParaVenda).to.eql(30);\r\n});"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/cadastro",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "cadastro"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Login - Sucesso",
-      "event": [
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/unidades/{{idUnidade}}/estoques/{{idProduto}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "unidades",
+                "{{idUnidade}}",
+                "estoques",
+                "{{idProduto}}"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Retorna status 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Retorna um token Bearer\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.accessToken).to.be.a(\"string\").and.not.empty;\r\n    pm.expect(resposta.tokenType).to.eql(\"Bearer\");\r\n    pm.expect(resposta.expiresIn).to.eql(900);\r\n});\r\n\r\npm.test(\"Não expõe dados sensíveis\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta).not.to.have.property(\"senha\");\r\n    pm.expect(resposta).not.to.have.property(\"senhaHash\");\r\n});\r\n\r\nconst resposta = pm.response.json();\r\npm.collectionVariables.set(\"accessToken\", resposta.accessToken);"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia13!\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Registrar saída",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 201\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"Reduz o saldo em cinco unidades\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.tipoMovimentacao).to.eql(\"SAIDA\");\r\n    pm.expect(resposta.saldoDisponivelAnterior).to.eql(30);\r\n    pm.expect(resposta.saldoDisponivelPosterior).to.eql(25);\r\n});"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Login - Senha incorreta",
-      "event": [
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipoMovimentacao\": \"SAIDA\",\r\n  \"quantidade\": 5,\r\n  \"motivo\": \"Ajuste por perda operacional\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/unidades/{{idUnidade}}/estoques/{{idProduto}}/movimentacoes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "unidades",
+                "{{idUnidade}}",
+                "estoques",
+                "{{idProduto}}",
+                "movimentacoes"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Retorna status 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de credenciais\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"CREDENCIAIS_INVALIDAS\");\r\n    pm.expect(resposta.message).to.eql(\"E-mail ou senha inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\").that.is.empty;\r\n});\r\n\r\npm.test(\"Não informa qual credencial está incorreta\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.message).not.to.include(\"cadastrado\");\r\n    pm.expect(resposta.message).not.to.include(\"incorreta\");\r\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"SenhaDeTesteDia10!\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "name": "Testar estoque insuficiente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Retorna status 409\", function () {\r\n    pm.response.to.have.status(409);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de negócio\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"BUSINESS_RULE_VIOLATION\");\r\n    pm.expect(resposta.message)\r\n        .to.eql(\"Estoque insuficiente para realizar a saída.\");\r\n});"
+                ]
+              }
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
           ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "login"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Login - e-mail inexistente",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Retorna status 401\", function () {\r\n    pm.response.to.have.status(401);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de credenciais\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"CREDENCIAIS_INVALIDAS\");\r\n    pm.expect(resposta.message).to.eql(\"E-mail ou senha inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\").that.is.empty;\r\n});\r\n\r\npm.test(\"Não informa se o e-mail está cadastrado\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.message).not.to.include(\"não cadastrado\");\r\n    pm.expect(resposta.message).not.to.include(\"não existe\");\r\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "noauth"
-        },
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"naoexiste@example.com\",\r\n  \"senha\": \"SenhaQualquer123!\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"tipoMovimentacao\": \"SAIDA\",\r\n  \"quantidade\": 100,\r\n  \"motivo\": \"Ajuste por perda operacional\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/unidades/{{idUnidade}}/estoques/{{idProduto}}/movimentacoes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "v1",
+                "unidades",
+                "{{idUnidade}}",
+                "estoques",
+                "{{idProduto}}",
+                "movimentacoes"
+              ]
             }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "login"
-          ]
+          },
+          "response": []
         }
-      },
-      "response": []
-    },
-    {
-      "name": "Login - campos obrigatórios vazios",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"Retorna status 422\", function () {\r\n    pm.response.to.have.status(422);\r\n});\r\n\r\npm.test(\"Retorna erro padronizado de validação\", function () {\r\n    const resposta = pm.response.json();\r\n\r\n    pm.expect(resposta.code).to.eql(\"VALIDATION_ERROR\");\r\n    pm.expect(resposta.message).to.eql(\"Existem campos inválidos.\");\r\n    pm.expect(resposta.path).to.eql(\"/api/v1/auth/login\");\r\n    pm.expect(resposta.details).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Informa os dois campos obrigatórios\", function () {\r\n    const resposta = pm.response.json();\r\n    const campos = resposta.details.map(detalhe => detalhe.field);\r\n\r\n    pm.expect(campos).to.include(\"email\");\r\n    pm.expect(campos).to.include(\"senha\");\r\n});"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "noauth"
-        },
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n  \"email\": \"\",\r\n  \"senha\": \"\"\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/v1/auth/login",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "api",
-            "v1",
-            "auth",
-            "login"
-          ]
-        }
-      },
-      "response": []
+      ]
     }
   ],
   "variable": [
     {
       "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "adminAccessToken",
+      "value": ""
+    },
+    {
+      "key": "clientAccessToken",
+      "value": ""
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "clientPassword",
+      "value": ""
+    },
+    {
+      "key": "idUnidade",
+      "value": ""
+    },
+    {
+      "key": "idProduto",
       "value": ""
     }
   ]

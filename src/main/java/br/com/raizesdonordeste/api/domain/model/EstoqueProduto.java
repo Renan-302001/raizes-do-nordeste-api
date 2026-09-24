@@ -82,6 +82,16 @@ public class EstoqueProduto {
         this.quantidadeDisponivel += quantidade;
     }
 
+    public void remover(int quantidade) {
+        validarQuantidadePositiva(quantidade);
+
+        if (!possuiDisponibilidade(quantidade)) {
+            throw new IllegalStateException("Estoque insuficiente para realizar a saída.");
+        }
+
+        this.quantidadeDisponivel -= quantidade;
+    }
+
     public void reservar(int quantidade) {
         validarQuantidadePositiva(quantidade);
 
