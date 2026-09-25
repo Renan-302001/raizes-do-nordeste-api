@@ -13,14 +13,29 @@ import java.util.UUID;
 
 public interface PedidoRepository extends JpaRepository<Pedido, UUID> {
 
+    @Override
+    @EntityGraph(attributePaths = "unidade")
+    Page<Pedido> findAll(Pageable pageable);
+
+    @EntityGraph(attributePaths = "unidade")
     Page<Pedido> findByCanalPedido(CanalPedido canalPedido, Pageable pageable);
 
+    @EntityGraph(attributePaths = "unidade")
+    Page<Pedido> findByStatusPedido(StatusPedido statusPedido, Pageable pageable);
+
+    @EntityGraph(attributePaths = "unidade")
     Page<Pedido> findByCanalPedidoAndStatusPedido(
             CanalPedido canalPedido,
             StatusPedido statusPedido,
             Pageable pageable
     );
 
-    @EntityGraph(attributePaths = {"itens", "itens.produto", "unidade", "cliente"})
+    @EntityGraph(attributePaths = {
+            "itens",
+            "itens.produto",
+            "unidade",
+            "cliente",
+            "usuarioCriador"
+    })
     Optional<Pedido> findDetalhadoByIdPedido(UUID idPedido);
 }

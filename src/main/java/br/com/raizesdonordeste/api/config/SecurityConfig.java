@@ -37,14 +37,16 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/auth/cadastro",
-                                "/api/v1/auth/login"
+                                "/api/v1/auth/login",
+                                "/api/v1/pedidos"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/api/v1/produtos",
                                 "/api/v1/produtos/**",
                                 "/api/v1/unidades",
-                                "/api/v1/unidades/*"
+                                "/api/v1/unidades/*",
+                                "/api/v1/unidades/*/cardapios/ativo"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
@@ -52,6 +54,15 @@ public class SecurityConfig {
                         ).hasRole("ADMIN_MATRIZ")
                         .requestMatchers(
                                 "/api/v1/unidades/*/estoques/**"
+                        ).hasAnyRole("GERENTE", "ADMIN_MATRIZ")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/unidades/*/cardapios",
+                                "/api/v1/cardapios/*/itens"
+                        ).hasAnyRole("GERENTE", "ADMIN_MATRIZ")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/pedidos"
                         ).hasAnyRole("GERENTE", "ADMIN_MATRIZ")
                         .anyRequest().authenticated()
                 );
