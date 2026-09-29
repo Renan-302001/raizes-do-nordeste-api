@@ -64,6 +64,10 @@ public class SecurityConfig {
                                 HttpMethod.GET,
                                 "/api/v1/pedidos"
                         ).hasAnyRole("GERENTE", "ADMIN_MATRIZ")
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/pedidos/*/pagamentos"
+                        ).hasAnyRole("CLIENTE", "ATENDENTE")
                         .anyRequest().authenticated()
                 );
 

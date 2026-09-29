@@ -1079,16 +1079,18 @@
       "item": [
         {
           "name": "Cadastrar cardápio ativo",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 201', () => pm.response.to.have.status(201));",
-                "pm.collectionVariables.set('idCardapio', pm.response.json().idCardapio);"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idCardapio', pm.response.json().idCardapio);"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1099,6 +1101,15 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/unidades/{{idUnidade}}/cardapios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Cardápio Principal\",\n  \"ativo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -1108,30 +1119,23 @@
                   "type": "string"
                 }
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nome\": \"Cardápio Principal\",\n  \"ativo\": true\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
           },
           "response": []
         },
         {
           "name": "Adicionar produto ao cardápio",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 201', () => pm.response.to.have.status(201));"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1142,6 +1146,15 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/cardapios/{{idCardapio}}/itens",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idProduto\": \"{{idProduto}}\",\n  \"preco\": 18.90\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "auth": {
               "type": "bearer",
               "bearer": [
@@ -1151,40 +1164,27 @@
                   "type": "string"
                 }
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"idProduto\": \"{{idProduto}}\",\n  \"preco\": 18.90\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
           },
           "response": []
         },
         {
           "name": "Consultar cardápio ativo da unidade",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                "pm.test('Cardápio possui itens', () => pm.expect(pm.response.json().itens).to.be.an('array').that.is.not.empty);"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Cardápio possui itens', () => pm.expect(pm.response.json().itens).to.be.an('array').that.is.not.empty);"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": "{{baseUrl}}/api/v1/unidades/{{idUnidade}}/cardapios/ativo",
             "auth": {
               "type": "noauth"
@@ -1194,17 +1194,19 @@
         },
         {
           "name": "Criar pedido - sucesso",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 201', () => pm.response.to.have.status(201));",
-                "pm.test('Pedido aguarda pagamento', () => pm.expect(pm.response.json().statusPedido).to.eql('AGUARDANDO_PAGAMENTO'));",
-                "pm.collectionVariables.set('idPedido', pm.response.json().idPedido);"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Pedido aguarda pagamento', () => pm.expect(pm.response.json().statusPedido).to.eql('AGUARDANDO_PAGAMENTO'));",
+                  "pm.collectionVariables.set('idPedido', pm.response.json().idPedido);"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1215,41 +1217,37 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/pedidos",
-            "auth": {
-              "type": "noauth"
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [\n    {\n      \"idProduto\": \"{{idProduto}}\",\n      \"quantidade\": 2\n    }\n  ]\n}",
+              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"canalPedido\": \"TOTEM\",\n  \"itens\": [{\n    \"idProduto\": \"{{idProduto}}\",\n    \"quantidade\": 2\n  }]\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "noauth"
             }
           },
           "response": []
         },
         {
           "name": "Consultar pedido por ID",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 200', () => pm.response.to.have.status(200));"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": "{{baseUrl}}/api/v1/pedidos/{{idPedido}}",
             "auth": {
               "type": "bearer",
@@ -1266,15 +1264,17 @@
         },
         {
           "name": "Criar pedido - canal obrigatório",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 422', () => pm.response.to.have.status(422));"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1285,32 +1285,34 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/pedidos",
-            "auth": {
-              "type": "noauth"
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"itens\": [\n    {\n      \"idProduto\": \"{{idProduto}}\",\n      \"quantidade\": 2\n    }\n  ]\n}",
+              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"itens\": [{\n    \"idProduto\": \"{{idProduto}}\",\n    \"quantidade\": 2\n  }]\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "noauth"
             }
           },
           "response": []
         },
         {
           "name": "Criar pedido - estoque insuficiente",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 409', () => pm.response.to.have.status(409));"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -1321,42 +1323,38 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/pedidos",
-            "auth": {
-              "type": "noauth"
-            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [\n    {\n      \"idProduto\": \"{{idProduto}}\",\n      \"quantidade\": 999999\n    }\n  ]\n}",
+              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [{\n    \"idProduto\": \"{{idProduto}}\",\n    \"quantidade\": 999999\n  }]\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
+            },
+            "auth": {
+              "type": "noauth"
             }
           },
           "response": []
         },
         {
           "name": "Listar pedidos por canal e status",
-          "event": {
-            "listen": "test",
-            "script": {
-              "exec": [
-                "pm.test('Status 200', () => pm.response.to.have.status(200));",
-                "pm.test('Resposta paginada', () => pm.expect(pm.response.json().content).to.be.an('array'));"
-              ],
-              "type": "text/javascript"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Resposta paginada', () => pm.expect(pm.response.json().content).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
             }
-          },
+          ],
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
+            "header": [],
             "url": "{{baseUrl}}/api/v1/pedidos?canalPedido=TOTEM&status=AGUARDANDO_PAGAMENTO",
             "auth": {
               "type": "bearer",
@@ -1364,6 +1362,314 @@
                 {
                   "key": "token",
                   "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pagamentos",
+      "item": [
+        {
+          "name": "Pagamento aprovado",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+              "pm.collectionVariables.set('chavePagamentoAprovado', pm.variables.replaceIn('{{$guid}}'));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Pagamento aprovado e pedido confirmado', () => { const r=pm.response.json(); pm.expect(r.statusPagamento).to.eql('APROVADO'); pm.expect(r.statusPedido).to.eql('CONFIRMADO'); });",
+                  "pm.collectionVariables.set('idPagamentoPrimeiro', pm.response.json().idPagamento);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chavePagamentoAprovado}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedido}}/pagamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultadoSimulado\": \"APROVADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Repetir pagamento aprovado - idempotência",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Retorna o mesmo pagamento', () => pm.expect(pm.response.json().idPagamento).to.eql(pm.collectionVariables.get('idPagamentoPrimeiro')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chavePagamentoAprovado}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedido}}/pagamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultadoSimulado\": \"APROVADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar pedido - testar pagamento recusado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('idPedidoRecusado', pm.response.json().idPedido);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [{\n    \"idProduto\": \"{{idProduto}}\",\n    \"quantidade\": 1\n  }]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pagamento recusado",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+              "pm.collectionVariables.set('chavePagamentoRecusado', pm.variables.replaceIn('{{$guid}}'));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Pagamento e pedido recusados', () => { const r=pm.response.json(); pm.expect(r.statusPagamento).to.eql('RECUSADO'); pm.expect(r.statusPedido).to.eql('PAGAMENTO_RECUSADO'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chavePagamentoRecusado}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/pagamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultadoSimulado\": \"RECUSADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Nova tentativa após recusa - aprovada",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+              "pm.collectionVariables.set('chavePagamentoRetry', pm.variables.replaceIn('{{$guid}}'));"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Nova tentativa aprovada', () => { const r=pm.response.json(); pm.expect(r.statusPagamento).to.eql('APROVADO'); pm.expect(r.statusPedido).to.eql('CONFIRMADO'); });",
+                  "pm.collectionVariables.set('idPagamento', pm.response.json().idPagamento);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chavePagamentoRetry}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/pagamentos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultadoSimulado\": \"APROVADO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar pagamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Retorna o pagamento solicitado', () => pm.expect(pm.response.json().idPagamento).to.eql(pm.collectionVariables.get('idPagamento')));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/pagamentos/{{idPagamento}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
                   "type": "string"
                 }
               ]
@@ -1422,6 +1728,36 @@
     },
     {
       "key": "idPedido",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idPedidoRecusado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idPagamentoPrimeiro",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idPagamento",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chavePagamentoAprovado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chavePagamentoRecusado",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "chavePagamentoRetry",
       "value": "",
       "type": "string"
     }
