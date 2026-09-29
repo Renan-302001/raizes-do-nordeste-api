@@ -2,6 +2,7 @@ package br.com.raizesdonordeste.api.controller.exception;
 
 
 import br.com.raizesdonordeste.api.application.exception.CadastroDuplicadoException;
+import br.com.raizesdonordeste.api.application.exception.AcessoNegadoException;
 import br.com.raizesdonordeste.api.application.exception.CredenciaisInvalidasException;
 import br.com.raizesdonordeste.api.application.exception.RecursoNaoEncontradoException;
 import br.com.raizesdonordeste.api.application.exception.RegraNegocioException;
@@ -26,6 +27,24 @@ import java.util.UUID;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<ErroResponse> tratarAcessoNegado(
+            AcessoNegadoException exception,
+            HttpServletRequest request
+    ) {
+        ErroResponse erro = new ErroResponse(
+                Instant.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "ACCESS_DENIED",
+                exception.getMessage(),
+                request.getRequestURI(),
+                UUID.randomUUID().toString(),
+                List.of()
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(erro);
+    }
 
     @ExceptionHandler(CadastroDuplicadoException.class)
     public ResponseEntity<ErroResponse> tratarCadastroDuplicado(

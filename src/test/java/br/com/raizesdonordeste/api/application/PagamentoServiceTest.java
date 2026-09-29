@@ -13,6 +13,7 @@ import br.com.raizesdonordeste.api.domain.model.StatusPagamento;
 import br.com.raizesdonordeste.api.domain.model.StatusPedido;
 import br.com.raizesdonordeste.api.domain.model.Unidade;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.EstoqueProdutoRepository;
+import br.com.raizesdonordeste.api.infrastructure.persistence.repository.HistoricoStatusPedidoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.MovimentacaoEstoqueRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.PagamentoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.PedidoRepository;
@@ -49,6 +50,8 @@ class PagamentoServiceTest {
     private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
     @Mock
     private PagamentoGateway pagamentoGateway;
+    @Mock
+    private HistoricoStatusPedidoRepository historicoStatusPedidoRepository;
     @Mock
     private Unidade unidade;
     @Mock

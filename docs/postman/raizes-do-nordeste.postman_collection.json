@@ -1381,7 +1381,7 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-              "pm.collectionVariables.set('chavePagamentoAprovado', pm.variables.replaceIn('{{$guid}}'));"
+                  "pm.collectionVariables.set('chavePagamentoAprovado', pm.variables.replaceIn('{{$guid}}'));"
                 ],
                 "type": "text/javascript"
               }
@@ -1532,7 +1532,7 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-              "pm.collectionVariables.set('chavePagamentoRecusado', pm.variables.replaceIn('{{$guid}}'));"
+                  "pm.collectionVariables.set('chavePagamentoRecusado', pm.variables.replaceIn('{{$guid}}'));"
                 ],
                 "type": "text/javascript"
               }
@@ -1592,7 +1592,7 @@
               "listen": "prerequest",
               "script": {
                 "exec": [
-              "pm.collectionVariables.set('chavePagamentoRetry', pm.variables.replaceIn('{{$guid}}'));"
+                  "pm.collectionVariables.set('chavePagamentoRetry', pm.variables.replaceIn('{{$guid}}'));"
                 ],
                 "type": "text/javascript"
               }
@@ -1678,6 +1678,305 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Operação de Pedidos",
+      "item": [
+        {
+          "name": "Iniciar preparo do pedido",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Pedido em preparo', () => pm.expect(pm.response.json().statusPedido).to.eql('EM_PREPARO'));"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/status",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"novoStatus\": \"EM_PREPARO\",\n  \"observacao\": \"Pedido encaminhado para a cozinha.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Marcar pedido como pronto",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Pedido pronto', () => pm.expect(pm.response.json().statusPedido).to.eql('PRONTO'));"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/status",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"novoStatus\": \"PRONTO\",\n  \"observacao\": \"Preparo concluído pela cozinha.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar entrega do pedido",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Pedido entregue', () => pm.expect(pm.response.json().statusPedido).to.eql('ENTREGUE'));"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/status",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"novoStatus\": \"ENTREGUE\",\n  \"observacao\": \"Pedido entregue ao cliente.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar histórico de status",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Histórico contém entrega', () => pm.expect(pm.response.json().some(h => h.statusNovo === 'ENTREGUE')).to.be.true);"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/historico-status",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar pedido autenticado para cancelamento",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                "pm.test('Pedido pertence ao cliente', () => pm.expect(pm.response.json().idCliente).not.to.be.null);",
+                "pm.collectionVariables.set('idPedidoCancelamento', pm.response.json().idPedido);"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idUnidade\": \"{{idUnidade}}\",\n  \"canalPedido\": \"APP\",\n  \"itens\": [{\n    \"idProduto\": \"{{idProduto}}\",\n    \"quantidade\": 1\n  }]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar próprio pedido",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                "pm.test('Pedido cancelado', () => pm.expect(pm.response.json().statusPedido).to.eql('CANCELADO'));"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoCancelamento}}/cancelar",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Cliente desistiu antes do pagamento.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancelar pedido pago - erro",
+          "event": {
+            "listen": "test",
+            "script": {
+              "exec": [
+                "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                "pm.test('Erro de regra de negócio', () => pm.expect(pm.response.json().code).to.eql('BUSINESS_RULE_VIOLATION'));"
+              ],
+              "type": "text/javascript"
+            }
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/pedidos/{{idPedidoRecusado}}/cancelar",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivo\": \"Tentativa inválida de cancelamento.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -1758,6 +2057,11 @@
     },
     {
       "key": "chavePagamentoRetry",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idPedidoCancelamento",
       "value": "",
       "type": "string"
     }

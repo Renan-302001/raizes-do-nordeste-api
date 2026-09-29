@@ -2,6 +2,9 @@ package br.com.raizesdonordeste.api.controller;
 
 import br.com.raizesdonordeste.api.application.PedidoService;
 import br.com.raizesdonordeste.api.controller.dto.CriarPedidoRequest;
+import br.com.raizesdonordeste.api.controller.dto.AtualizarStatusPedidoRequest;
+import br.com.raizesdonordeste.api.controller.dto.CancelarPedidoRequest;
+import br.com.raizesdonordeste.api.controller.dto.HistoricoStatusPedidoResponse;
 import br.com.raizesdonordeste.api.controller.dto.PaginaResponse;
 import br.com.raizesdonordeste.api.controller.dto.PedidoResponse;
 import br.com.raizesdonordeste.api.controller.dto.PedidoResumoResponse;
@@ -18,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/pedidos")
@@ -58,6 +65,44 @@ public class PedidoController {
         return new PedidoResponse(pedidoService.consultar(idPedido));
     }
 
+    @PatchMapping("/{idPedido}/status")
+    public PedidoResponse atualizarStatus(
+            @PathVariable UUID idPedido,
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody AtualizarStatusPedidoRequest request
+    ) {
+        return new PedidoResponse(pedidoService.atualizarStatus(
+                idPedido,
+                request.getNovoStatus(),
+                UUID.fromString(jwt.getSubject()),
+                extrairPerfis(jwt),
+                request.getObservacao()
+        ));
+    }
+
+    @PatchMapping("/{idPedido}/cancelar")
+    public PedidoResponse cancelar(
+            @PathVariable UUID idPedido,
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody(required = false) CancelarPedidoRequest request
+    ) {
+        return new PedidoResponse(pedidoService.cancelar(
+                idPedido,
+                UUID.fromString(jwt.getSubject()),
+                extrairPerfis(jwt),
+                request == null ? null : request.getMotivo()
+        ));
+    }
+
+    @GetMapping("/{idPedido}/historico-status")
+    public List<HistoricoStatusPedidoResponse> listarHistorico(
+            @PathVariable UUID idPedido
+    ) {
+        return pedidoService.listarHistorico(idPedido).stream()
+                .map(HistoricoStatusPedidoResponse::new)
+                .toList();
+    }
+
     @GetMapping
     public PaginaResponse<PedidoResumoResponse> listar(
             @RequestParam(required = false) CanalPedido canalPedido,
@@ -73,5 +118,10 @@ public class PedidoController {
         );
 
         return PaginaResponse.from(pedidos, PedidoResumoResponse::new);
+    }
+
+    private Set<String> extrairPerfis(Jwt jwt) {
+        List<String> perfis = jwt.getClaimAsStringList("roles");
+        return perfis == null ? Set.of() : new HashSet<>(perfis);
     }
 }

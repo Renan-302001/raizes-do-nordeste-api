@@ -178,9 +178,11 @@ public class Pedido {
     }
 
     public void cancelar() {
-        if (statusPedido == StatusPedido.ENTREGUE
-                || statusPedido == StatusPedido.CANCELADO) {
-            throw new IllegalStateException("O pedido não pode ser cancelado neste estado.");
+        if (statusPedido != StatusPedido.AGUARDANDO_PAGAMENTO
+                && statusPedido != StatusPedido.PAGAMENTO_RECUSADO) {
+            throw new IllegalStateException(
+                    "Somente pedidos ainda não pagos podem ser cancelados diretamente."
+            );
         }
 
         this.statusPedido = StatusPedido.CANCELADO;

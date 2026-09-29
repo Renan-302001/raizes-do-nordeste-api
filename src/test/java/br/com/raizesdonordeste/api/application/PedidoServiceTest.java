@@ -13,9 +13,12 @@ import br.com.raizesdonordeste.api.domain.model.StatusItemCardapio;
 import br.com.raizesdonordeste.api.domain.model.StatusPedido;
 import br.com.raizesdonordeste.api.domain.model.StatusProduto;
 import br.com.raizesdonordeste.api.domain.model.StatusUnidade;
+import br.com.raizesdonordeste.api.domain.model.StatusConta;
 import br.com.raizesdonordeste.api.domain.model.Unidade;
+import br.com.raizesdonordeste.api.domain.model.Usuario;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.EstoqueProdutoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.ItemCardapioRepository;
+import br.com.raizesdonordeste.api.infrastructure.persistence.repository.HistoricoStatusPedidoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.MovimentacaoEstoqueRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.PedidoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.ProdutoRepository;
@@ -31,6 +34,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,11 +64,15 @@ class PedidoServiceTest {
     @Mock
     private MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
     @Mock
+    private HistoricoStatusPedidoRepository historicoStatusPedidoRepository;
+    @Mock
     private Unidade unidade;
     @Mock
     private Produto produto;
     @Mock
     private ItemCardapio itemCardapio;
+    @Mock
+    private Usuario usuario;
 
     @InjectMocks
     private PedidoService pedidoService;
@@ -149,6 +158,81 @@ class PedidoServiceTest {
         verify(estoqueProdutoRepository, never())
                 .buscarParaAtualizacao(any(), any());
         verify(pedidoRepository, never()).saveAndFlush(any(Pedido.class));
+    }
+
+    @Test
+    void deveExecutarFluxoOperacionalDoPedido() {
+        UUID idPedido = UUID.randomUUID();
+        UUID idUsuario = UUID.randomUUID();
+        when(produto.getNome()).thenReturn("Cuscuz Tradicional");
+        Pedido pedido = new Pedido(unidade, null, null, CanalPedido.BALCAO);
+        pedido.adicionarItem(produto, 1, new BigDecimal("18.90"));
+        pedido.registrarPagamentoAprovado();
+
+        when(pedidoRepository.buscarParaProcessamentoPagamento(idPedido))
+                .thenReturn(Optional.of(pedido));
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.of(usuario));
+        when(usuario.getStatusConta()).thenReturn(StatusConta.ATIVA);
+
+        pedidoService.atualizarStatus(
+                idPedido,
+                StatusPedido.EM_PREPARO,
+                idUsuario,
+                Set.of("ADMIN_MATRIZ"),
+                null
+        );
+        pedidoService.atualizarStatus(
+                idPedido,
+                StatusPedido.PRONTO,
+                idUsuario,
+                Set.of("ADMIN_MATRIZ"),
+                null
+        );
+        pedidoService.atualizarStatus(
+                idPedido,
+                StatusPedido.ENTREGUE,
+                idUsuario,
+                Set.of("ADMIN_MATRIZ"),
+                null
+        );
+
+        assertEquals(StatusPedido.ENTREGUE, pedido.getStatusPedido());
+        verify(historicoStatusPedidoRepository, times(3)).save(any());
+    }
+
+    @Test
+    void deveCancelarPedidoELiberarReserva() {
+        UUID idPedido = UUID.randomUUID();
+        UUID idUsuario = UUID.randomUUID();
+        UUID idUnidade = UUID.randomUUID();
+        UUID idProduto = UUID.randomUUID();
+        when(produto.getNome()).thenReturn("Cuscuz Tradicional");
+        when(produto.getIdProduto()).thenReturn(idProduto);
+        when(unidade.getIdUnidade()).thenReturn(idUnidade);
+        Pedido pedido = new Pedido(unidade, null, null, CanalPedido.APP);
+        pedido.adicionarItem(produto, 2, new BigDecimal("18.90"));
+        EstoqueProduto estoque = new EstoqueProduto(unidade, produto, 10, 0);
+        estoque.reservar(2);
+
+        when(pedidoRepository.buscarParaProcessamentoPagamento(idPedido))
+                .thenReturn(Optional.of(pedido));
+        when(usuarioRepository.findById(idUsuario)).thenReturn(Optional.of(usuario));
+        when(usuario.getStatusConta()).thenReturn(StatusConta.ATIVA);
+        when(estoqueProdutoRepository.buscarParaAtualizacao(idUnidade, idProduto))
+                .thenReturn(Optional.of(estoque));
+
+        pedidoService.cancelar(
+                idPedido,
+                idUsuario,
+                Set.of("ADMIN_MATRIZ"),
+                "Cliente desistiu."
+        );
+
+        assertEquals(StatusPedido.CANCELADO, pedido.getStatusPedido());
+        assertEquals(0, estoque.getQuantidadeReservada());
+        assertEquals(10, estoque.getQuantidadeDisponivel());
+        verify(movimentacaoEstoqueRepository).saveAll(anyList());
+        verify(historicoStatusPedidoRepository).save(any());
     }
 
     private EstoqueProduto prepararFluxoValido(

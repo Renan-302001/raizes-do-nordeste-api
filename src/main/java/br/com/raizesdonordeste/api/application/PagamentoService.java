@@ -6,14 +6,17 @@ import br.com.raizesdonordeste.api.application.gateway.CenarioPagamentoMock;
 import br.com.raizesdonordeste.api.application.gateway.PagamentoGateway;
 import br.com.raizesdonordeste.api.application.gateway.ResultadoPagamentoGateway;
 import br.com.raizesdonordeste.api.domain.model.EstoqueProduto;
+import br.com.raizesdonordeste.api.domain.model.HistoricoStatusPedido;
 import br.com.raizesdonordeste.api.domain.model.ItemPedido;
 import br.com.raizesdonordeste.api.domain.model.MovimentacaoEstoque;
+import br.com.raizesdonordeste.api.domain.model.OrigemAlteracaoPedido;
 import br.com.raizesdonordeste.api.domain.model.Pagamento;
 import br.com.raizesdonordeste.api.domain.model.Pedido;
 import br.com.raizesdonordeste.api.domain.model.StatusPagamento;
 import br.com.raizesdonordeste.api.domain.model.StatusPedido;
 import br.com.raizesdonordeste.api.domain.model.TipoMovimentacaoEstoque;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.EstoqueProdutoRepository;
+import br.com.raizesdonordeste.api.infrastructure.persistence.repository.HistoricoStatusPedidoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.MovimentacaoEstoqueRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.PagamentoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.PedidoRepository;
@@ -33,19 +36,22 @@ public class PagamentoService {
     private final EstoqueProdutoRepository estoqueProdutoRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
     private final PagamentoGateway pagamentoGateway;
+    private final HistoricoStatusPedidoRepository historicoStatusPedidoRepository;
 
     public PagamentoService(
             PagamentoRepository pagamentoRepository,
             PedidoRepository pedidoRepository,
             EstoqueProdutoRepository estoqueProdutoRepository,
             MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
-            PagamentoGateway pagamentoGateway
+            PagamentoGateway pagamentoGateway,
+            HistoricoStatusPedidoRepository historicoStatusPedidoRepository
     ) {
         this.pagamentoRepository = pagamentoRepository;
         this.pedidoRepository = pedidoRepository;
         this.estoqueProdutoRepository = estoqueProdutoRepository;
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
         this.pagamentoGateway = pagamentoGateway;
+        this.historicoStatusPedidoRepository = historicoStatusPedidoRepository;
     }
 
     @Transactional
@@ -131,6 +137,7 @@ public class PagamentoService {
     ) {
         try {
             if (resultado.status() == StatusPagamento.APROVADO) {
+                StatusPedido statusAnterior = pedido.getStatusPedido();
                 pagamento.aprovar(
                         resultado.idTransacao(),
                         resultado.codigo(),
@@ -138,16 +145,19 @@ public class PagamentoService {
                 );
                 confirmarSaidaDoEstoque(pedido);
                 pedido.registrarPagamentoAprovado();
+                registrarHistoricoPagamento(pedido, statusAnterior);
                 return;
             }
 
             if (resultado.status() == StatusPagamento.RECUSADO) {
+                StatusPedido statusAnterior = pedido.getStatusPedido();
                 pagamento.recusar(
                         resultado.idTransacao(),
                         resultado.codigo(),
                         resultado.mensagem()
                 );
                 pedido.registrarPagamentoRecusado();
+                registrarHistoricoPagamento(pedido, statusAnterior);
                 return;
             }
 
@@ -196,5 +206,19 @@ public class PagamentoService {
         }
 
         movimentacaoEstoqueRepository.saveAll(movimentacoes);
+    }
+
+    private void registrarHistoricoPagamento(
+            Pedido pedido,
+            StatusPedido statusAnterior
+    ) {
+        historicoStatusPedidoRepository.save(new HistoricoStatusPedido(
+                pedido,
+                pedido.getUsuarioCriador(),
+                statusAnterior,
+                pedido.getStatusPedido(),
+                OrigemAlteracaoPedido.PAGAMENTO,
+                "Resultado recebido do gateway de pagamento mock."
+        ));
     }
 }

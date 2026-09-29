@@ -65,6 +65,19 @@ public class SecurityConfig {
                                 "/api/v1/pedidos"
                         ).hasAnyRole("GERENTE", "ADMIN_MATRIZ")
                         .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/v1/pedidos/*/status"
+                        ).hasAnyRole("COZINHA", "ATENDENTE", "ADMIN_MATRIZ")
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/api/v1/pedidos/*/cancelar"
+                        ).hasAnyRole(
+                                "CLIENTE",
+                                "ATENDENTE",
+                                "GERENTE",
+                                "ADMIN_MATRIZ"
+                        )
+                        .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/pedidos/*/pagamentos"
                         ).hasAnyRole("CLIENTE", "ATENDENTE")

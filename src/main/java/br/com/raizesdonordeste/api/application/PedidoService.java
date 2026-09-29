@@ -2,12 +2,17 @@ package br.com.raizesdonordeste.api.application;
 
 import br.com.raizesdonordeste.api.application.exception.RecursoNaoEncontradoException;
 import br.com.raizesdonordeste.api.application.exception.RegraNegocioException;
+import br.com.raizesdonordeste.api.application.exception.AcessoNegadoException;
 import br.com.raizesdonordeste.api.controller.dto.ItemPedidoRequest;
 import br.com.raizesdonordeste.api.domain.model.CanalPedido;
 import br.com.raizesdonordeste.api.domain.model.Cliente;
 import br.com.raizesdonordeste.api.domain.model.EstoqueProduto;
+import br.com.raizesdonordeste.api.domain.model.Funcionario;
+import br.com.raizesdonordeste.api.domain.model.HistoricoStatusPedido;
 import br.com.raizesdonordeste.api.domain.model.ItemCardapio;
+import br.com.raizesdonordeste.api.domain.model.ItemPedido;
 import br.com.raizesdonordeste.api.domain.model.MovimentacaoEstoque;
+import br.com.raizesdonordeste.api.domain.model.OrigemAlteracaoPedido;
 import br.com.raizesdonordeste.api.domain.model.Pedido;
 import br.com.raizesdonordeste.api.domain.model.Produto;
 import br.com.raizesdonordeste.api.domain.model.StatusCardapio;
@@ -20,6 +25,7 @@ import br.com.raizesdonordeste.api.domain.model.TipoMovimentacaoEstoque;
 import br.com.raizesdonordeste.api.domain.model.Unidade;
 import br.com.raizesdonordeste.api.domain.model.Usuario;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.EstoqueProdutoRepository;
+import br.com.raizesdonordeste.api.infrastructure.persistence.repository.HistoricoStatusPedidoRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.ItemCardapioRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.MovimentacaoEstoqueRepository;
 import br.com.raizesdonordeste.api.infrastructure.persistence.repository.PedidoRepository;
@@ -34,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -46,6 +54,7 @@ public class PedidoService {
     private final ItemCardapioRepository itemCardapioRepository;
     private final EstoqueProdutoRepository estoqueProdutoRepository;
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    private final HistoricoStatusPedidoRepository historicoStatusPedidoRepository;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
@@ -54,7 +63,8 @@ public class PedidoService {
             UsuarioRepository usuarioRepository,
             ItemCardapioRepository itemCardapioRepository,
             EstoqueProdutoRepository estoqueProdutoRepository,
-            MovimentacaoEstoqueRepository movimentacaoEstoqueRepository
+            MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
+            HistoricoStatusPedidoRepository historicoStatusPedidoRepository
     ) {
         this.pedidoRepository = pedidoRepository;
         this.unidadeRepository = unidadeRepository;
@@ -63,6 +73,7 @@ public class PedidoService {
         this.itemCardapioRepository = itemCardapioRepository;
         this.estoqueProdutoRepository = estoqueProdutoRepository;
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
+        this.historicoStatusPedidoRepository = historicoStatusPedidoRepository;
     }
 
     @Transactional
@@ -124,7 +135,110 @@ public class PedidoService {
 
         Pedido pedidoSalvo = pedidoRepository.saveAndFlush(pedido);
         registrarReservas(pedidoSalvo, usuario, reservas);
+        registrarHistorico(
+                pedidoSalvo,
+                usuario,
+                null,
+                StatusPedido.AGUARDANDO_PAGAMENTO,
+                OrigemAlteracaoPedido.CRIACAO,
+                "Pedido criado."
+        );
         return pedidoSalvo;
+    }
+
+    @Transactional
+    public Pedido atualizarStatus(
+            UUID idPedido,
+            StatusPedido novoStatus,
+            UUID idUsuarioResponsavel,
+            Set<String> perfis,
+            String observacao
+    ) {
+        Pedido pedido = buscarPedidoParaAtualizacao(idPedido);
+        Usuario usuario = buscarUsuarioObrigatorio(idUsuarioResponsavel);
+        validarEscopoDaUnidade(usuario, pedido, perfis);
+        StatusPedido statusAnterior = pedido.getStatusPedido();
+
+        try {
+            switch (novoStatus) {
+                case EM_PREPARO -> {
+                    exigirPerfil(perfis, "COZINHA", "Somente a cozinha pode iniciar o preparo.");
+                    pedido.iniciarPreparo();
+                }
+                case PRONTO -> {
+                    exigirPerfil(perfis, "COZINHA", "Somente a cozinha pode marcar o pedido como pronto.");
+                    pedido.marcarComoPronto();
+                }
+                case ENTREGUE -> {
+                    exigirPerfil(perfis, "ATENDENTE", "Somente o atendimento pode registrar a entrega.");
+                    pedido.registrarEntrega();
+                }
+                default -> throw new RegraNegocioException(
+                        "O status informado não é uma transição operacional permitida."
+                );
+            }
+        } catch (IllegalStateException exception) {
+            throw new RegraNegocioException(exception.getMessage());
+        }
+
+        registrarHistorico(
+                pedido,
+                usuario,
+                statusAnterior,
+                pedido.getStatusPedido(),
+                OrigemAlteracaoPedido.OPERACAO,
+                observacao
+        );
+        pedido.getItens().size();
+        return pedido;
+    }
+
+    @Transactional
+    public Pedido cancelar(
+            UUID idPedido,
+            UUID idUsuarioResponsavel,
+            Set<String> perfis,
+            String motivo
+    ) {
+        Pedido pedido = buscarPedidoParaAtualizacao(idPedido);
+        Usuario usuario = buscarUsuarioObrigatorio(idUsuarioResponsavel);
+        validarPermissaoDeCancelamento(usuario, pedido, perfis);
+        validarEscopoDaUnidade(usuario, pedido, perfis);
+        StatusPedido statusAnterior = pedido.getStatusPedido();
+
+        if (statusAnterior != StatusPedido.AGUARDANDO_PAGAMENTO
+                && statusAnterior != StatusPedido.PAGAMENTO_RECUSADO) {
+            throw new RegraNegocioException(
+                    "Pedidos pagos exigem um fluxo de estorno antes do cancelamento."
+            );
+        }
+
+        liberarReservas(pedido, usuario);
+        try {
+            pedido.cancelar();
+        } catch (IllegalStateException exception) {
+            throw new RegraNegocioException(exception.getMessage());
+        }
+
+        registrarHistorico(
+                pedido,
+                usuario,
+                statusAnterior,
+                StatusPedido.CANCELADO,
+                OrigemAlteracaoPedido.CANCELAMENTO,
+                motivo
+        );
+        pedido.getItens().size();
+        return pedido;
+    }
+
+    @Transactional(readOnly = true)
+    public List<HistoricoStatusPedido> listarHistorico(UUID idPedido) {
+        if (!pedidoRepository.existsById(idPedido)) {
+            throw new RecursoNaoEncontradoException("Pedido não encontrado.");
+        }
+        return historicoStatusPedidoRepository
+                .findByPedido_IdPedidoOrderByAlteradoEmAsc(idPedido);
     }
 
     @Transactional(readOnly = true)
@@ -171,6 +285,125 @@ public class PedidoService {
             throw new RegraNegocioException("A conta do usuário não está ativa.");
         }
         return usuario;
+    }
+
+    private Usuario buscarUsuarioObrigatorio(UUID idUsuario) {
+        if (idUsuario == null) {
+            throw new AcessoNegadoException("Usuário autenticado não identificado.");
+        }
+        return buscarUsuarioOpcional(idUsuario);
+    }
+
+    private Pedido buscarPedidoParaAtualizacao(UUID idPedido) {
+        return pedidoRepository.buscarParaProcessamentoPagamento(idPedido)
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Pedido não encontrado."
+                ));
+    }
+
+    private void exigirPerfil(
+            Set<String> perfis,
+            String perfilNecessario,
+            String mensagem
+    ) {
+        if (!possuiPerfil(perfis, perfilNecessario)
+                && !possuiPerfil(perfis, "ADMIN_MATRIZ")) {
+            throw new AcessoNegadoException(mensagem);
+        }
+    }
+
+    private boolean possuiPerfil(Set<String> perfis, String perfil) {
+        return perfis != null && perfis.contains(perfil);
+    }
+
+    private void validarEscopoDaUnidade(
+            Usuario usuario,
+            Pedido pedido,
+            Set<String> perfis
+    ) {
+        if (possuiPerfil(perfis, "ADMIN_MATRIZ")) {
+            return;
+        }
+        if (usuario instanceof Funcionario funcionario
+                && !funcionario.getUnidade().getIdUnidade()
+                .equals(pedido.getUnidade().getIdUnidade())) {
+            throw new AcessoNegadoException(
+                    "O funcionário não pertence à unidade deste pedido."
+            );
+        }
+    }
+
+    private void validarPermissaoDeCancelamento(
+            Usuario usuario,
+            Pedido pedido,
+            Set<String> perfis
+    ) {
+        boolean perfilOperacional = possuiPerfil(perfis, "ATENDENTE")
+                || possuiPerfil(perfis, "GERENTE")
+                || possuiPerfil(perfis, "ADMIN_MATRIZ");
+        if (perfilOperacional) {
+            return;
+        }
+
+        if (!possuiPerfil(perfis, "CLIENTE")
+                || pedido.getCliente() == null
+                || !pedido.getCliente().getIdUsuario().equals(usuario.getIdUsuario())) {
+            throw new AcessoNegadoException(
+                    "O cliente só pode cancelar os próprios pedidos."
+            );
+        }
+    }
+
+    private void liberarReservas(Pedido pedido, Usuario usuario) {
+        List<MovimentacaoEstoque> movimentacoes = new ArrayList<>();
+        pedido.getItens().stream()
+                .sorted(Comparator.comparing(
+                        (ItemPedido item) -> item.getProduto().getIdProduto()
+                ))
+                .forEach(item -> {
+                    EstoqueProduto estoque = buscarEstoqueParaAtualizacao(
+                            pedido.getUnidade().getIdUnidade(),
+                            item.getProduto().getIdProduto()
+                    );
+                    int disponivelAnterior = estoque.getQuantidadeDisponivel();
+                    int reservadoAnterior = estoque.getQuantidadeReservada();
+                    try {
+                        estoque.liberarReserva(item.getQuantidade());
+                    } catch (IllegalArgumentException | IllegalStateException exception) {
+                        throw new RegraNegocioException(exception.getMessage());
+                    }
+                    movimentacoes.add(new MovimentacaoEstoque(
+                            estoque,
+                            pedido,
+                            usuario,
+                            TipoMovimentacaoEstoque.LIBERACAO_RESERVA,
+                            item.getQuantidade(),
+                            disponivelAnterior,
+                            estoque.getQuantidadeDisponivel(),
+                            reservadoAnterior,
+                            estoque.getQuantidadeReservada(),
+                            "Liberação por cancelamento do pedido"
+                    ));
+                });
+        movimentacaoEstoqueRepository.saveAll(movimentacoes);
+    }
+
+    private void registrarHistorico(
+            Pedido pedido,
+            Usuario usuario,
+            StatusPedido anterior,
+            StatusPedido novo,
+            OrigemAlteracaoPedido origem,
+            String observacao
+    ) {
+        historicoStatusPedidoRepository.save(new HistoricoStatusPedido(
+                pedido,
+                usuario,
+                anterior,
+                novo,
+                origem,
+                observacao
+        ));
     }
 
     private Produto buscarProdutoAtivo(UUID idProduto) {
