@@ -8,6 +8,11 @@ import br.com.raizesdonordeste.api.controller.dto.CadastroClienteResponse;
 import br.com.raizesdonordeste.api.controller.dto.LoginRequest;
 import br.com.raizesdonordeste.api.controller.dto.LoginResponse;
 import br.com.raizesdonordeste.api.domain.model.Cliente;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +27,8 @@ import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/v1/auth")
+@Tag(name = "Autenticação", description = "Cadastro de clientes e emissão de token JWT.")
+@SecurityRequirements
 public class AuthController {
 
     private final CadastroClienteService cadastroClienteService;
@@ -33,6 +40,12 @@ public class AuthController {
     }
 
     @PostMapping("/cadastro")
+    @Operation(summary = "Cadastrar um novo cliente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Cliente cadastrado"),
+            @ApiResponse(responseCode = "409", description = "E-mail ou CPF já cadastrado"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
     public ResponseEntity<CadastroClienteResponse> cadastrar(
             @Valid @RequestBody CadastroClienteRequest request
             ) {
@@ -55,6 +68,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Autenticar usuário e emitir token JWT")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Autenticação realizada"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request
             ) {

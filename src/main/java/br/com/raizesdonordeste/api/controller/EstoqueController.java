@@ -7,6 +7,8 @@ import br.com.raizesdonordeste.api.controller.dto.MovimentacaoEstoqueResponse;
 import br.com.raizesdonordeste.api.controller.dto.PaginaResponse;
 import br.com.raizesdonordeste.api.domain.model.EstoqueProduto;
 import br.com.raizesdonordeste.api.domain.model.MovimentacaoEstoque;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/unidades/{idUnidade}/estoques")
+@Tag(name = "Estoque", description = "Saldo e movimentações do estoque por unidade.")
 public class EstoqueController {
 
     private final EstoqueService estoqueService;
@@ -36,6 +39,7 @@ public class EstoqueController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar estoque da unidade")
     public PaginaResponse<EstoqueProdutoResponse> listar(
             @PathVariable UUID idUnidade,
             @RequestParam(defaultValue = "0") int page,
@@ -48,6 +52,7 @@ public class EstoqueController {
     }
 
     @GetMapping("/{idProduto}")
+    @Operation(summary = "Consultar estoque de um produto")
     public EstoqueProdutoResponse consultar(
             @PathVariable UUID idUnidade,
             @PathVariable UUID idProduto
@@ -58,6 +63,7 @@ public class EstoqueController {
     }
 
     @PostMapping("/{idProduto}/movimentacoes")
+    @Operation(summary = "Registrar entrada ou saída manual de estoque")
     public ResponseEntity<MovimentacaoEstoqueResponse> movimentar(
             @PathVariable UUID idUnidade,
             @PathVariable UUID idProduto,

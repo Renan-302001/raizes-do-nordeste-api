@@ -1,5 +1,6 @@
 package br.com.raizesdonordeste.api.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
@@ -8,23 +9,28 @@ public class CadastroClienteRequest {
 
     @NotBlank(message = "O nome é obrigatório.")
     @Size(max = 150, message = "O nome deve ter no máximo 150 caracteres.")
+    @Schema(example = "Maria da Silva")
     private String nome;
 
     @NotBlank(message = "O e-mail é obrigatório.")
     @Email(message = "O e-mail deve possuir um formato válido.")
     @Size(max = 254, message = "O e-mail deve ter no máximo 254 caracteres.")
+    @Schema(example = "maria@example.com")
     private String email;
 
     @NotBlank(message = "A senha é obrigatória.")
     @Size(min = 15, message = "A senha deve ter pelo menos 15 caracteres.")
+    @Schema(example = "SenhaSegura123!", format = "password")
     private String senha;
 
     @NotBlank(message = "O CPF é obrigatório.")
     @Pattern(regexp = "[0-9]{11}", message = "O CPF deve conter exatamente 11 dígitos.")
+    @Schema(example = "12345678901")
     private String cpf;
 
     @NotNull(message = "A data de nascimento é obrigatória.")
     @Past(message = "A data de nascimento deve estar no passado.")
+    @Schema(example = "1995-06-30", type = "string", format = "date")
     private LocalDate dataNascimento;
 
     public String getNome() {

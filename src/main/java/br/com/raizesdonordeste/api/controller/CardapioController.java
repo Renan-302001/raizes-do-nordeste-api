@@ -7,6 +7,9 @@ import br.com.raizesdonordeste.api.controller.dto.CardapioResponse;
 import br.com.raizesdonordeste.api.controller.dto.ItemCardapioResponse;
 import br.com.raizesdonordeste.api.domain.model.Cardapio;
 import br.com.raizesdonordeste.api.domain.model.ItemCardapio;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
+@Tag(name = "Cardápios", description = "Cardápio e disponibilidade de produtos por unidade.")
 public class CardapioController {
 
     private final CardapioService cardapioService;
@@ -31,6 +35,7 @@ public class CardapioController {
     }
 
     @PostMapping("/unidades/{idUnidade}/cardapios")
+    @Operation(summary = "Cadastrar cardápio para uma unidade")
     public ResponseEntity<CardapioResponse> cadastrar(
             @PathVariable UUID idUnidade,
             @Valid @RequestBody CadastroCardapioRequest request
@@ -46,6 +51,7 @@ public class CardapioController {
     }
 
     @PostMapping("/cardapios/{idCardapio}/itens")
+    @Operation(summary = "Adicionar produto ao cardápio")
     public ResponseEntity<ItemCardapioResponse> adicionarItem(
             @PathVariable UUID idCardapio,
             @Valid @RequestBody CadastroItemCardapioRequest request
@@ -63,6 +69,8 @@ public class CardapioController {
     }
 
     @GetMapping("/unidades/{idUnidade}/cardapios/ativo")
+    @Operation(summary = "Consultar cardápio ativo da unidade")
+    @SecurityRequirements
     public CardapioResponse buscarAtivo(@PathVariable UUID idUnidade) {
         Cardapio cardapio = cardapioService.buscarAtivo(idUnidade);
 

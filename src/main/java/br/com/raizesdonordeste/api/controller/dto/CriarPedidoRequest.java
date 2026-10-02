@@ -1,6 +1,7 @@
 package br.com.raizesdonordeste.api.controller.dto;
 
 import br.com.raizesdonordeste.api.domain.model.CanalPedido;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -12,9 +13,11 @@ import java.util.UUID;
 public class CriarPedidoRequest {
 
     @NotNull(message = "A unidade é obrigatória.")
+    @Schema(example = "03f5da4c-76d4-47d5-87a5-b65aa68a597d")
     private UUID idUnidade;
 
     @NotNull(message = "O canal do pedido é obrigatório.")
+    @Schema(example = "TOTEM")
     private CanalPedido canalPedido;
 
     @Valid

@@ -1,5 +1,6 @@
 package br.com.raizesdonordeste.api.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -8,9 +9,11 @@ import java.util.UUID;
 public class ItemPedidoRequest {
 
     @NotNull(message = "O produto é obrigatório.")
+    @Schema(example = "7efb6e41-dc33-42a0-8914-2f957589e01e")
     private UUID idProduto;
 
     @Positive(message = "A quantidade deve ser maior que zero.")
+    @Schema(example = "2")
     private int quantidade;
 
     public UUID getIdProduto() {

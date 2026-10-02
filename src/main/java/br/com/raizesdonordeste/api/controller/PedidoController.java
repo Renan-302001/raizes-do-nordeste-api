@@ -11,6 +11,11 @@ import br.com.raizesdonordeste.api.controller.dto.PedidoResumoResponse;
 import br.com.raizesdonordeste.api.domain.model.CanalPedido;
 import br.com.raizesdonordeste.api.domain.model.Pedido;
 import br.com.raizesdonordeste.api.domain.model.StatusPedido;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +40,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/pedidos")
+@Tag(name = "Pedidos", description = "Criação, consulta e operação dos pedidos.")
 public class PedidoController {
 
     private final PedidoService pedidoService;
@@ -44,6 +50,14 @@ public class PedidoController {
     }
 
     @PostMapping
+    @Operation(summary = "Criar pedido e reservar estoque")
+    @SecurityRequirements
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Pedido criado e estoque reservado"),
+            @ApiResponse(responseCode = "404", description = "Unidade ou item do cardápio não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Produto indisponível ou estoque insuficiente"),
+            @ApiResponse(responseCode = "422", description = "Dados inválidos")
+    })
     public ResponseEntity<PedidoResponse> criar(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CriarPedidoRequest request
@@ -61,11 +75,19 @@ public class PedidoController {
     }
 
     @GetMapping("/{idPedido}")
+    @Operation(summary = "Consultar pedido por identificador")
     public PedidoResponse consultar(@PathVariable UUID idPedido) {
         return new PedidoResponse(pedidoService.consultar(idPedido));
     }
 
     @PatchMapping("/{idPedido}/status")
+    @Operation(summary = "Atualizar status operacional do pedido")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status atualizado"),
+            @ApiResponse(responseCode = "403", description = "Perfil sem permissão"),
+            @ApiResponse(responseCode = "404", description = "Pedido não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Transição de status inválida")
+    })
     public PedidoResponse atualizarStatus(
             @PathVariable UUID idPedido,
             @AuthenticationPrincipal Jwt jwt,
@@ -81,6 +103,13 @@ public class PedidoController {
     }
 
     @PatchMapping("/{idPedido}/cancelar")
+    @Operation(summary = "Cancelar pedido ainda não pago")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pedido cancelado e reservas liberadas"),
+            @ApiResponse(responseCode = "403", description = "Perfil sem permissão"),
+            @ApiResponse(responseCode = "404", description = "Pedido não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Pedido não pode mais ser cancelado")
+    })
     public PedidoResponse cancelar(
             @PathVariable UUID idPedido,
             @AuthenticationPrincipal Jwt jwt,
@@ -95,6 +124,7 @@ public class PedidoController {
     }
 
     @GetMapping("/{idPedido}/historico-status")
+    @Operation(summary = "Consultar histórico de status do pedido")
     public List<HistoricoStatusPedidoResponse> listarHistorico(
             @PathVariable UUID idPedido
     ) {
@@ -104,6 +134,7 @@ public class PedidoController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar pedidos com filtros de canal e status")
     public PaginaResponse<PedidoResumoResponse> listar(
             @RequestParam(required = false) CanalPedido canalPedido,
             @RequestParam(required = false) StatusPedido status,
