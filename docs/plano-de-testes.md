@@ -154,5 +154,3 @@ O fluxo é considerado aprovado quando:
 - as transições do pedido permanecem disponíveis no histórico;
 - os scripts correspondentes aparecem aprovados no Postman.
 
-
-

@@ -1,83 +1,99 @@
 # API Raízes do Nordeste
 
-Back-end desenvolvido para o estudo de caso da rede **Raízes do Nordeste**. A API implementa um fluxo completo de pedido com persistência, reserva e baixa de estoque, pagamento externo simulado, atualização de status e auditoria do histórico do pedido.
+Este projeto foi desenvolvido para o estudo de caso da rede **Raízes do Nordeste**, na disciplina de Projeto Back-End.
 
-## Tecnologias
+O objetivo foi criar uma API que permita cadastrar clientes, consultar produtos e unidades, controlar o estoque e realizar pedidos. O fluxo principal implementado vai desde a criação do pedido até o pagamento simulado e a atualização do seu status.
 
-- Java 21
-- Spring Boot 4
-- Spring Web, Spring Data JPA e Spring Security
-- JWT para autenticação e autorização
-- PostgreSQL
-- Flyway para versionamento do banco
-- Springdoc OpenAPI/Swagger UI
-- JUnit 5 e Mockito
-- Postman para testes manuais da API
+## Tecnologias utilizadas
+
+- Java 21;
+- Spring Boot 4;
+- Spring Web;
+- Spring Data JPA;
+- Spring Security;
+- JWT;
+- PostgreSQL;
+- Flyway;
+- Swagger/OpenAPI;
+- JUnit 5 e Mockito;
+- Postman.
 
 ## Organização do projeto
 
-O código segue uma separação simplificada por responsabilidades:
+O projeto foi separado em pacotes de acordo com a responsabilidade de cada parte:
 
-- `domain`: entidades, enums e regras do negócio;
-- `application`: serviços que coordenam os casos de uso;
-- `controller`: endpoints e contratos HTTP de entrada e saída;
-- `infrastructure`: persistência, integrações, segurança e inicialização de dados;
-- `config`: configuração de segurança, JWT e OpenAPI.
+- `domain`: entidades, enums e regras de negócio;
+- `application`: serviços que executam as operações da aplicação;
+- `controller`: endpoints, dados de entrada e respostas da API;
+- `infrastructure`: repositórios, integrações, segurança e dados iniciais;
+- `config`: configurações de segurança, JWT e Swagger.
+
+Essa separação foi utilizada para evitar que as regras de negócio ficassem misturadas com o acesso ao banco ou com os controllers.
 
 ## Funcionalidades implementadas
 
-- cadastro de cliente e autenticação por JWT;
-- controle de acesso por perfis;
-- consulta e cadastro de produtos;
+- cadastro de cliente;
+- login e autenticação por JWT;
+- controle de acesso por perfil;
+- cadastro e consulta de produtos;
 - consulta de unidades;
-- cardápio ativo por unidade e inclusão de itens;
-- entrada, saída e consulta de estoque por unidade;
-- criação de pedido com `canalPedido` obrigatório;
-- validação e reserva de estoque na criação do pedido;
-- pagamento mock aprovado ou recusado, com chave de idempotência;
-- baixa do estoque após aprovação do pagamento;
-- atualização operacional do pedido: preparo, pronto e entregue;
-- cancelamento de pedido ainda não pago e liberação das reservas;
-- consulta e filtro de pedidos por canal e status;
-- histórico de alterações de status;
-- respostas de erro em formato padronizado.
+- criação de cardápio e inclusão de produtos;
+- entrada, saída e consulta de estoque;
+- criação de pedido com o campo `canalPedido`;
+- reserva de estoque durante a criação do pedido;
+- pagamento mock aprovado ou recusado;
+- uso de chave de idempotência no pagamento;
+- baixa do estoque depois do pagamento aprovado;
+- atualização do pedido para `EM_PREPARO`, `PRONTO` e `ENTREGUE`;
+- cancelamento de pedido ainda não pago;
+- consulta de pedidos por canal e status;
+- registro do histórico de status;
+- respostas de erro padronizadas.
 
-## Pré-requisitos
+## Requisitos para executar
+
+Antes de iniciar, é necessário ter instalado:
 
 - JDK 21;
-- PostgreSQL em execução;
+- PostgreSQL;
 - Git;
-- IntelliJ IDEA ou outro editor compatível com Maven;
-- Postman, opcionalmente, para executar a coleção entregue.
+- IntelliJ IDEA ou outra IDE compatível com Maven;
+- Postman, caso seja utilizada a coleção de testes.
 
-O Maven Wrapper acompanha o repositório, portanto não é necessário instalar o Maven separadamente.
+O projeto possui Maven Wrapper, portanto não é necessário instalar o Maven separadamente.
 
-## Preparação do banco
+## Configuração do banco de dados
 
-No PostgreSQL, crie o usuário e o banco usados pela aplicação. A senha abaixo é apenas ilustrativa e deve ser substituída por uma senha local segura.
+Com o PostgreSQL em execução, crie o usuário e o banco da aplicação. A senha apresentada abaixo é apenas um exemplo e deve ser substituída por uma senha local.
 
 ```sql
 CREATE USER raizes_app WITH PASSWORD 'defina_uma_senha_local';
 CREATE DATABASE raizes_nordeste OWNER raizes_app;
 ```
 
-As tabelas não precisam ser criadas manualmente. Na primeira inicialização, o Flyway executa automaticamente as migrations existentes em `src/main/resources/db/migration`.
+As tabelas não precisam ser criadas manualmente. O Flyway executa as migrations automaticamente quando a aplicação é iniciada.
+
+Os arquivos das migrations estão em:
+
+```text
+src/main/resources/db/migration
+```
 
 ## Variáveis de ambiente
 
-Use `.env.example` como referência. O arquivo contém apenas valores demonstrativos e pode ser copiado para uma configuração local que não seja versionada.
+O arquivo `.env.example` pode ser utilizado como referência. As variáveis necessárias são:
 
-| Variável | Obrigatória | Finalidade |
+| Variável | Obrigatória | Utilização |
 |---|---:|---|
-| `DB_URL` | Não | URL do PostgreSQL. Há um valor local padrão. |
-| `DB_USERNAME` | Não | Usuário do banco. O padrão é `raizes_app`. |
-| `DB_PASSWORD` | Sim | Senha local do usuário do banco. |
-| `JWT_SECRET` | Sim | Chave Base64 de pelo menos 32 bytes para assinar os tokens. |
-| `SERVER_PORT` | Não | Porta HTTP. O padrão é `8080`. |
-| `SEED_ENABLED` | Não | Use `true` para criar os dados iniciais de desenvolvimento. |
-| `SEED_ADMIN_PASSWORD` | Quando o seed estiver ativo | Senha local do administrador inicial. |
+| `DB_URL` | Não | Endereço do PostgreSQL. O projeto possui um valor local padrão. |
+| `DB_USERNAME` | Não | Usuário do banco. O valor padrão é `raizes_app`. |
+| `DB_PASSWORD` | Sim | Senha do usuário do banco. |
+| `JWT_SECRET` | Sim | Chave Base64 com pelo menos 32 bytes para gerar os tokens. |
+| `SERVER_PORT` | Não | Porta da aplicação. O valor padrão é `8080`. |
+| `SEED_ENABLED` | Não | Deve receber `true` para criar os dados iniciais. |
+| `SEED_ADMIN_PASSWORD` | Com o seed ativo | Senha do administrador inicial. |
 
-Uma chave JWT pode ser gerada no PowerShell sem registrar a chave no repositório:
+Uma chave para o JWT pode ser gerada no PowerShell com os comandos abaixo:
 
 ```powershell
 $bytes = New-Object byte[] 32
@@ -85,9 +101,11 @@ $bytes = New-Object byte[] 32
 [Convert]::ToBase64String($bytes)
 ```
 
-No IntelliJ IDEA, informe as variáveis em **Run > Edit Configurations > Environment variables**. Não inclua senhas ou chaves reais em commits.
+No IntelliJ IDEA, as variáveis podem ser adicionadas em **Run > Edit Configurations > Environment variables**.
 
-## Execução
+As senhas e chaves utilizadas localmente não devem ser enviadas para o repositório.
+
+## Como iniciar a aplicação
 
 No Windows:
 
@@ -101,64 +119,72 @@ No Linux ou macOS:
 ./mvnw spring-boot:run
 ```
 
-Com o seed habilitado, a aplicação cria os perfis básicos e o administrador `admin.matriz@raizes.local`. A senha será exatamente a definida em `SEED_ADMIN_PASSWORD`.
+Quando o seed está habilitado, a aplicação cria os perfis necessários e o administrador com o e-mail `admin.matriz@raizes.local`. A senha será o valor configurado em `SEED_ADMIN_PASSWORD`.
 
-## Documentação da API
+## Swagger
 
-Com a aplicação em execução:
+Depois de iniciar a aplicação, a documentação pode ser acessada nos endereços:
 
 - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- especificação OpenAPI em JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+- OpenAPI em JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
-No Swagger, use o botão **Authorize** e informe somente o token JWT retornado pelo login. O prefixo `Bearer` é aplicado pelo próprio Swagger.
+Para testar uma rota protegida pelo Swagger, primeiro realize o login. Em seguida, copie o token retornado e informe no botão **Authorize**. Não é necessário escrever `Bearer`, pois o Swagger adiciona esse prefixo.
 
-## Recursos principais da API
+## Principais rotas
 
-| Recurso | Base das rotas | Responsabilidade |
+| Recurso | Rota base | Finalidade |
 |---|---|---|
 | Autenticação | `/api/v1/auth` | Cadastro e login |
-| Unidades | `/api/v1/unidades` | Consulta das unidades |
-| Produtos | `/api/v1/produtos` | Catálogo de produtos |
-| Cardápios | `/api/v1/unidades/{id}/cardapios` | Cardápio e disponibilidade por unidade |
-| Estoque | `/api/v1/unidades/{id}/estoques` | Saldo e movimentações locais |
-| Pedidos | `/api/v1/pedidos` | Criação, consulta, operação e cancelamento |
-| Pagamentos | `/api/v1/pedidos/{id}/pagamentos` | Solicitação ao gateway mock |
+| Unidades | `/api/v1/unidades` | Consulta de unidades |
+| Produtos | `/api/v1/produtos` | Cadastro e consulta de produtos |
+| Cardápios | `/api/v1/unidades/{id}/cardapios` | Cardápio de cada unidade |
+| Estoque | `/api/v1/unidades/{id}/estoques` | Consulta e movimentação do estoque |
+| Pedidos | `/api/v1/pedidos` | Criação, consulta, atualização e cancelamento |
+| Pagamentos | `/api/v1/pedidos/{id}/pagamentos` | Solicitação do pagamento mock |
 
-O contrato completo, incluindo requests, responses, permissões e códigos HTTP, está disponível no Swagger.
+Os dados de entrada, respostas, permissões e códigos HTTP de cada endpoint podem ser consultados no Swagger.
 
-## Fluxo principal para demonstração
+## Fluxo utilizado na demonstração
 
-1. cadastrar ou autenticar um cliente;
-2. autenticar o administrador de desenvolvimento;
-3. cadastrar um produto e abastecer o estoque da unidade;
-4. criar um cardápio e adicionar o produto;
-5. criar um pedido informando unidade, itens e `canalPedido`;
-6. solicitar o pagamento mock com uma chave de idempotência;
-7. consultar o pagamento e o pedido atualizado;
-8. mover o pedido por `EM_PREPARO`, `PRONTO` e `ENTREGUE`;
-9. consultar o histórico de status.
+Para testar o fluxo principal, pode ser seguida esta ordem:
 
-O gateway mock também permite demonstrar pagamento recusado. A mesma chave de idempotência enviada novamente para a mesma operação retorna o resultado já registrado, evitando cobrança duplicada.
+1. cadastrar um cliente;
+2. realizar o login;
+3. autenticar o administrador;
+4. cadastrar um produto;
+5. adicionar estoque para o produto;
+6. criar um cardápio e adicionar o produto;
+7. criar um pedido com os itens e o `canalPedido`;
+8. solicitar o pagamento mock com uma chave de idempotência;
+9. consultar o pagamento e o pedido;
+10. atualizar o pedido para `EM_PREPARO`, `PRONTO` e `ENTREGUE`;
+11. consultar o histórico de status.
 
-## Coleção Postman
+O gateway mock permite testar pagamentos aprovados e recusados. Quando a mesma chave de idempotência é enviada novamente para a mesma operação, a API retorna o pagamento que já foi registrado.
 
-Importe o arquivo:
+## Coleção do Postman
 
-`docs/postman/raizes-do-nordeste.postman_collection.json`
+A coleção está no seguinte caminho:
 
-A coleção está organizada nas pastas **Auth**, **Estoque e Produtos**, **Pedidos**, **Pagamentos** e **Operação de Pedidos**. Os scripts armazenam automaticamente tokens e identificadores usados pelas requisições seguintes.
+```text
+docs/postman/raizes-do-nordeste.postman_collection.json
+```
 
-Antes da execução:
+Ela foi separada nas pastas **Auth**, **Estoque e Produtos**, **Pedidos**, **Pagamentos** e **Operação de Pedidos**.
 
-1. mantenha a API iniciada;
-2. confira a variável `baseUrl`;
-3. defina apenas localmente as senhas usadas nos logins;
-4. execute as pastas na ordem apresentada;
-5. o cadastro de cliente deve ser executado apenas uma vez para o mesmo e-mail; uma repetição correta retorna conflito `409`.
+Antes de executar a coleção:
+
+1. inicie a API;
+2. confira se a variável `baseUrl` está correta;
+3. configure localmente as senhas utilizadas nos logins;
+4. execute as pastas na ordem em que aparecem;
+5. execute o cadastro apenas uma vez para o mesmo e-mail.
+
+Os scripts da coleção salvam os tokens e identificadores necessários para as requisições seguintes.
 
 ## Testes automatizados
 
-No Windows:
+Para executar todos os testes no Windows:
 
 ```powershell
 .\mvnw.cmd test
@@ -170,11 +196,11 @@ No Linux ou macOS:
 ./mvnw test
 ```
 
-Os testes cobrem regras de domínio, serviços de aplicação, persistência, tratamento de erros e segurança. Eles usam a mesma configuração de banco definida pelas variáveis de ambiente; por isso o PostgreSQL precisa estar acessível durante a execução completa.
+Os testes verificam regras de negócio, serviços, persistência, segurança e tratamento de erros. Como alguns testes utilizam o banco, o PostgreSQL deve estar iniciado e as variáveis de ambiente devem estar configuradas.
 
-## Padrão de erro
+## Formato dos erros
 
-As falhas da API seguem uma estrutura única. Exemplo de validação:
+Os erros da API seguem o mesmo formato. Este é um exemplo de erro de validação:
 
 ```json
 {
@@ -193,22 +219,20 @@ As falhas da API seguem uma estrutura única. Exemplo de validação:
 }
 ```
 
-Os retornos `401` e `403` também usam esse padrão.
+Os erros `401` e `403` também utilizam esse formato.
 
-## Segurança e privacidade
+## Segurança
 
-- senhas armazenadas exclusivamente com hash BCrypt;
-- autenticação stateless por JWT;
-- autorização por perfil em rotas administrativas e operacionais;
-- resposta de cadastro nunca expõe o hash da senha;
-- identificador de correlação nas respostas de erro;
-- histórico para rastrear mudanças de status do pedido;
-- segredos e credenciais mantidos fora do repositório.
+As senhas são armazenadas utilizando BCrypt e não aparecem nas respostas da API. A autenticação utiliza JWT e as rotas são liberadas de acordo com o perfil do usuário.
 
-O modelo completo prevê consentimento, fidelidade, campanhas e auditoria ampliada. Esses módulos permanecem documentados como evoluções do sistema e não fazem parte do fluxo técnico implementado neste MVP.
+As chaves e senhas utilizadas para executar o projeto ficam em variáveis de ambiente e não são armazenadas no repositório.
 
-## Estado da entrega
+## Limitações desta versão
 
-O MVP implementado fecha o fluxo **Pedido → Pagamento mock → Atualização de status**, com persistência real em PostgreSQL. Estorno, programa de fidelidade e campanhas foram modelados conceitualmente, mas não implementados nesta versão por priorização do fluxo obrigatório.
+O fluxo completo implementado nesta versão é **Pedido → Pagamento mock → Atualização de status**, com os dados armazenados no PostgreSQL.
 
-Repositório: [github.com/Renan-302001/raizes-do-nordeste-api](https://github.com/Renan-302001/raizes-do-nordeste-api)
+As funcionalidades de estorno, fidelidade, campanhas, consentimento e auditoria completa foram consideradas na modelagem, mas não foram implementadas no MVP. Elas podem ser desenvolvidas em uma versão futura do sistema.
+
+## Repositório
+
+[github.com/Renan-302001/raizes-do-nordeste-api](https://github.com/Renan-302001/raizes-do-nordeste-api)

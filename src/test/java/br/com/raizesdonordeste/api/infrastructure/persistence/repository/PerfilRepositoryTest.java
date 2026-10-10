@@ -33,18 +33,15 @@ class PerfilRepositoryTest {
     }
     @Test
     void deveSalvarEBuscarPerfilPorCodigo() {
-        // Preparar dados exclusivos para esta execução.
         String sufixo = UUID.randomUUID().toString();
         String codigo = "TESTE_" + sufixo;
         String nome = "Perfil de teste " + sufixo;
         Perfil perfil = new Perfil(codigo, nome, "Teste de persistência", TipoEscopo.UNIDADE);
 
-        // Enviar o INSERT ao banco e remover os objetos do contexto do JPA.
         perfilRepository.saveAndFlush(perfil);
         UUID id = perfil.getIdPerfil();
         entityManager.clear();
 
-        // Consultar novamente e verificar os valores recuperados.
         Perfil encontrado = perfilRepository.findByCodigoPerfil(codigo).orElseThrow();
 
         assertNotNull(id);

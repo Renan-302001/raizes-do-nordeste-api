@@ -665,7 +665,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"cadastro.teste@example.com\",\r\n  \"senha\": \"{{clientPassword}}\"\r\n}",
+              "raw": "{\r\n  \"email\": \"cadastro.dia13@example.com\",\r\n  \"senha\": \"{{clientPassword}}\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1971,6 +1971,18 @@
       "item": [
         {
           "name": "Iniciar preparo do pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Pedido em preparo', () => pm.expect(pm.response.json().statusPedido).to.eql('EM_PREPARO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2017,6 +2029,18 @@
         },
         {
           "name": "Marcar pedido como pronto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Pedido pronto', () => pm.expect(pm.response.json().statusPedido).to.eql('PRONTO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2063,6 +2087,18 @@
         },
         {
           "name": "Registrar entrega do pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Pedido entregue', () => pm.expect(pm.response.json().statusPedido).to.eql('ENTREGUE'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2109,6 +2145,18 @@
         },
         {
           "name": "Consultar histórico de status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Histórico contém entrega', () => pm.expect(pm.response.json().some(h => h.statusNovo === 'ENTREGUE')).to.be.true);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2140,6 +2188,19 @@
         },
         {
           "name": "Criar pedido autenticado para cancelamento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Pedido pertence ao cliente', () => pm.expect(pm.response.json().idCliente).not.to.be.null);",
+                  "pm.collectionVariables.set('idPedidoCancelamento', pm.response.json().idPedido);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2184,6 +2245,18 @@
         },
         {
           "name": "Cancelar próprio pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Pedido cancelado', () => pm.expect(pm.response.json().statusPedido).to.eql('CANCELADO'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -2230,6 +2303,18 @@
         },
         {
           "name": "Cancelar pedido pago - erro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Erro de regra de negócio', () => pm.expect(pm.response.json().code).to.eql('BUSINESS_RULE_VIOLATION'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
