@@ -4,7 +4,7 @@
 
 Este plano apresenta os cenários utilizados para validar o fluxo principal da API Raízes do Nordeste. Os testes verificam autenticação, autorização, validação de dados, estoque por unidade, criação de pedidos, pagamento mock, atualização de status e rastreabilidade das alterações.
 
-Os cenários estão implementados na coleção `docs/postman/raizes-do-nordeste-entrega-final.postman_collection.json`. A coleção deve ser executada com a API e o PostgreSQL em funcionamento.
+Os cenários estão implementados na coleção `postman/raizes-do-nordeste.postman_collection.json`. A coleção deve ser executada com a API e o PostgreSQL em funcionamento.
 
 ## 2. Estratégia
 
@@ -154,17 +154,5 @@ O fluxo é considerado aprovado quando:
 - as transições do pedido permanecem disponíveis no histórico;
 - os scripts correspondentes aparecem aprovados no Postman.
 
-## 7. Evidências complementares
 
-Para o documento final, recomenda-se incluir capturas de tela de:
 
-1. login com retorno `200` e token parcialmente ocultado;
-2. pedido criado com status `AGUARDANDO_PAGAMENTO`;
-3. pagamento mock aprovado e pedido `CONFIRMADO`;
-4. erro de estoque insuficiente com status `409`;
-5. acesso sem token com status `401`;
-6. acesso com perfil sem permissão com status `403`;
-7. execução da coleção com as asserções aprovadas;
-8. execução dos testes automatizados do projeto.
-
-Tokens completos, senhas, chaves JWT e credenciais do banco não devem aparecer nas evidências.

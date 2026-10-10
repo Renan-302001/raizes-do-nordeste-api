@@ -144,7 +144,7 @@ O gateway mock também permite demonstrar pagamento recusado. A mesma chave de i
 
 Importe o arquivo:
 
-`docs/postman/raizes-do-nordeste-entrega-final.postman_collection.json`
+`docs/postman/raizes-do-nordeste.postman_collection.json`
 
 A coleção está organizada nas pastas **Auth**, **Estoque e Produtos**, **Pedidos**, **Pagamentos** e **Operação de Pedidos**. Os scripts armazenam automaticamente tokens e identificadores usados pelas requisições seguintes.
 
